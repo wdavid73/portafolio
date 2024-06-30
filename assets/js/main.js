@@ -1,190 +1,291 @@
-/*
-	Hyperspace by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
-*/
+/** 
+ * ===================================================================
+ * main js
+ *
+ * ------------------------------------------------------------------- 
+ */ 
 
 (function($) {
 
-	var	$window = $(window),
-		$body = $('body'),
-		$sidebar = $('#sidebar');
+	"use strict";
 
-	// Breakpoints.
-		breakpoints({
-			xlarge:   [ '1281px',  '1680px' ],
-			large:    [ '981px',   '1280px' ],
-			medium:   [ '737px',   '980px'  ],
-			small:    [ '481px',   '736px'  ],
-			xsmall:   [ null,      '480px'  ]
-		});
+	/*---------------------------------------------------- */
+	/* Preloader
+	------------------------------------------------------ */ 
+   $(window).load(function() {
 
-	// Hack: Enable IE flexbox workarounds.
-		if (browser.name == 'ie')
-			$body.addClass('is-ie');
+      // will first fade out the loading animation 
+    	$("#loader").fadeOut("slow", function(){
 
-	// Play initial animations on page load.
-		$window.on('load', function() {
-			window.setTimeout(function() {
-				$body.removeClass('is-preload');
-			}, 100);
-		});
+        // will fade out the whole DIV that covers the website.
+        $("#preloader").delay(300).fadeOut("slow");
 
-	// Forms.
+      });       
 
-		// Hack: Activate non-input submits.
-			$('form').on('click', '.submit', function(event) {
+  	})
 
-				// Stop propagation, default.
-					event.stopPropagation();
-					event.preventDefault();
 
-				// Submit form.
-					$(this).parents('form').submit();
+  	/*---------------------------------------------------- */
+  	/* FitText Settings
+  	------------------------------------------------------ */
+  	setTimeout(function() {
 
-			});
+   	$('#intro h1').fitText(1, { minFontSize: '42px', maxFontSize: '84px' });
 
-	// Sidebar.
-		if ($sidebar.length > 0) {
+  	}, 100);
 
-			var $sidebar_a = $sidebar.find('a');
 
-			$sidebar_a
-				.addClass('scrolly')
-				.on('click', function() {
+	/*---------------------------------------------------- */
+	/* FitVids
+	------------------------------------------------------ */ 
+  	$(".fluid-video-wrapper").fitVids();
 
-					var $this = $(this);
 
-					// External link? Bail.
-						if ($this.attr('href').charAt(0) != '#')
-							return;
+	/*---------------------------------------------------- */
+	/* Owl Carousel
+	------------------------------------------------------ */ 
+	$("#owl-slider").owlCarousel({
+        navigation: false,
+        pagination: true,
+        itemsCustom : [
+	        [0, 1],
+	        [700, 2],
+	        [960, 3]
+	     ],
+        navigationText: false
+    });
 
-					// Deactivate all links.
-						$sidebar_a.removeClass('active');
 
-					// Activate link *and* lock it (so Scrollex doesn't try to activate other links as we're scrolling to this one's section).
-						$this
-							.addClass('active')
-							.addClass('active-locked');
+	/*----------------------------------------------------- */
+	/* Alert Boxes
+  	------------------------------------------------------- */
+	$('.alert-box').on('click', '.close', function() {
+	  $(this).parent().fadeOut(500);
+	});	
 
-				})
-				.each(function() {
 
-					var	$this = $(this),
-						id = $this.attr('href'),
-						$section = $(id);
+	/*----------------------------------------------------- */
+	/* Stat Counter
+  	------------------------------------------------------- */
+   var statSection = $("#stats"),
+       stats = $(".stat-count");
 
-					// No section for this link? Bail.
-						if ($section.length < 1)
-							return;
+   statSection.waypoint({
 
-					// Scrollex.
-						$section.scrollex({
-							mode: 'middle',
-							top: '-20vh',
-							bottom: '-20vh',
-							initialize: function() {
+   	handler: function(direction) {
 
-								// Deactivate section.
-									$section.addClass('inactive');
+      	if (direction === "down") {       		
 
-							},
-							enter: function() {
+			   stats.each(function () {
+				   var $this = $(this);
 
-								// Activate section.
-									$section.removeClass('inactive');
-
-								// No locked links? Deactivate all links and activate this section's one.
-									if ($sidebar_a.filter('.active-locked').length == 0) {
-
-										$sidebar_a.removeClass('active');
-										$this.addClass('active');
-
-									}
-
-								// Otherwise, if this section's link is the one that's locked, unlock it.
-									else if ($this.hasClass('active-locked'))
-										$this.removeClass('active-locked');
-
-							}
-						});
-
+				   $({ Counter: 0 }).animate({ Counter: $this.text() }, {
+				   	duration: 4000,
+				   	easing: 'swing',
+				   	step: function (curValue) {
+				      	$this.text(Math.ceil(curValue));
+				    	}
+				  	});
 				});
 
-		}
+       	} 
 
-	// Scrolly.
-		$('.scrolly').scrolly({
-			speed: 1000,
-			offset: function() {
+       	// trigger once only
+       	this.destroy();      	
 
-				// If <=large, >small, and sidebar is present, use its height as the offset.
-					if (breakpoints.active('<=large')
-					&&	!breakpoints.active('<=small')
-					&&	$sidebar.length > 0)
-						return $sidebar.height();
+		},
+			
+		offset: "90%"
+	
+	});	
 
-				return 0;
 
-			}
+	/*---------------------------------------------------- */
+	/*	Masonry
+	------------------------------------------------------ */
+	var containerProjects = $('#folio-wrapper');
+
+	containerProjects.imagesLoaded( function() {
+
+		containerProjects.masonry( {		  
+		  	itemSelector: '.folio-item',
+		  	resize: true 
 		});
 
-	// Spotlights.
-		$('.spotlights > section')
-			.scrollex({
-				mode: 'middle',
-				top: '-10vh',
-				bottom: '-10vh',
-				initialize: function() {
+	});
 
-					// Deactivate section.
-						$(this).addClass('inactive');
 
-				},
-				enter: function() {
+	/*----------------------------------------------------*/
+	/*	Modal Popup
+	------------------------------------------------------*/
+   $('.item-wrap a').magnificPopup({
 
-					// Activate section.
-						$(this).removeClass('inactive');
+      type:'inline',
+      fixedContentPos: false,
+      removalDelay: 300,
+      showCloseBtn: false,
+      mainClass: 'mfp-fade'
 
-				}
-			})
-			.each(function() {
+   });
 
-				var	$this = $(this),
-					$image = $this.find('.image'),
-					$img = $image.find('img'),
-					x;
+   $(document).on('click', '.popup-modal-dismiss', function (e) {
+   	e.preventDefault();
+   	$.magnificPopup.close();
+   });
 
-				// Assign image.
-					$image.css('background-image', 'url(' + $img.attr('src') + ')');
+	
+	/*-----------------------------------------------------*/
+  	/* Navigation Menu
+   ------------------------------------------------------ */  
+   var toggleButton = $('.menu-toggle'),
+       nav = $('.main-navigation');
 
-				// Set background position.
-					if (x = $img.data('position'))
-						$image.css('background-position', x);
+   // toggle button
+   toggleButton.on('click', function(e) {
 
-				// Hide <img>.
-					$img.hide();
+		e.preventDefault();
+		toggleButton.toggleClass('is-clicked');
+		nav.slideToggle();
 
-			});
+	});
 
-	// Features.
-		$('.features')
-			.scrollex({
-				mode: 'middle',
-				top: '-20vh',
-				bottom: '-20vh',
-				initialize: function() {
+   // nav items
+  	nav.find('li a').on("click", function() {   
 
-					// Deactivate section.
-						$(this).addClass('inactive');
+   	// update the toggle button 		
+   	toggleButton.toggleClass('is-clicked'); 
+   	// fadeout the navigation panel
+   	nav.fadeOut();   		
+   	     
+  	});
 
-				},
-				enter: function() {
 
-					// Activate section.
-						$(this).removeClass('inactive');
+   /*---------------------------------------------------- */
+  	/* Highlight the current section in the navigation bar
+  	------------------------------------------------------ */
+	var sections = $("section"),
+	navigation_links = $("#main-nav-wrap li a");	
 
-				}
-			});
+	sections.waypoint( {
+
+       handler: function(direction) {
+
+		   var active_section;
+
+			active_section = $('section#' + this.element.id);
+
+			if (direction === "up") active_section = active_section.prev();
+
+			var active_link = $('#main-nav-wrap a[href="#' + active_section.attr("id") + '"]');			
+
+         navigation_links.parent().removeClass("current");
+			active_link.parent().addClass("current");
+
+		}, 
+
+		offset: '25%'
+	});
+
+
+	/*---------------------------------------------------- */
+  	/* Smooth Scrolling
+  	------------------------------------------------------ */
+  	$('.smoothscroll').on('click', function (e) {
+	 	
+	 	e.preventDefault();
+
+   	var target = this.hash,
+    	$target = $(target);
+
+    	$('html, body').stop().animate({
+       	'scrollTop': $target.offset().top
+      }, 800, 'swing', function () {
+      	window.location.hash = target;
+      });
+
+  	});  
+  
+
+   /*---------------------------------------------------- */
+	/*  Placeholder Plugin Settings
+	------------------------------------------------------ */ 
+	$('input, textarea, select').placeholder()  
+
+
+  	/*---------------------------------------------------- */
+	/*	contact form
+	------------------------------------------------------ */
+
+	/* local validation */
+	$('#contactForm').validate({
+
+		/* submit via ajax */
+		submitHandler: function(form) {
+
+			var sLoader = $('#submit-loader');
+
+			$.ajax({      	
+
+		      type: "POST",
+		      url: "inc/sendEmail.php",
+		      data: $(form).serialize(),
+		      beforeSend: function() { 
+
+		      	sLoader.fadeIn(); 
+
+		      },
+		      success: function(msg) {
+
+	            // Message was sent
+	            if (msg == 'OK') {
+	            	sLoader.fadeOut(); 
+	               $('#message-warning').hide();
+	               $('#contactForm').fadeOut();
+	               $('#message-success').fadeIn();   
+	            }
+	            // There was an error
+	            else {
+	            	sLoader.fadeOut(); 
+	               $('#message-warning').html(msg);
+		            $('#message-warning').fadeIn();
+	            }
+
+		      },
+		      error: function() {
+
+		      	sLoader.fadeOut(); 
+		      	$('#message-warning').html("Something went wrong. Please try again.");
+		         $('#message-warning').fadeIn();
+
+		      }
+
+	      });     		
+  		}
+
+	});
+
+
+ 	/*----------------------------------------------------- */
+  	/* Back to top
+   ------------------------------------------------------- */ 
+	var pxShow = 300; // height on which the button will show
+	var fadeInTime = 400; // how slow/fast you want the button to show
+	var fadeOutTime = 400; // how slow/fast you want the button to hide
+	var scrollSpeed = 300; // how slow/fast you want the button to scroll to top. can be a value, 'slow', 'normal' or 'fast'
+
+   // Show or hide the sticky footer button
+	jQuery(window).scroll(function() {
+
+		if (!( $("#header-search").hasClass('is-visible'))) {
+
+			if (jQuery(window).scrollTop() >= pxShow) {
+				jQuery("#go-top").fadeIn(fadeInTime);
+			} else {
+				jQuery("#go-top").fadeOut(fadeOutTime);
+			}
+
+		}		
+
+	});		
 
 })(jQuery);
